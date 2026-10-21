@@ -1,0 +1,23 @@
+version: 1
+skills:
+    - name: c2j-operations
+      source: c2j
+      ref: bundled
+      skill_path: skills/c2j-operations
+      scope: project
+      path: .agents/skills/c2j-operations
+      digest: sha256:b369186ef1a93f00e69613bcf0488f41398915ea58af113438fcf23a030038ac
+    - name: c2j-recipes
+      source: c2j
+      ref: bundled
+      skill_path: skills/c2j-recipes
+      scope: project
+      path: .agents/skills/c2j-recipes
+      digest: sha256:e09bd34fd21f4f4d70aa82add92a03a2b27b0556e6b869688169f76160ff7acf
+    - name: c2ops-extension-ops
+      source: c2j
+      ref: bundled
+      skill_path: skills/c2ops-extension-ops
+      scope: project
+      path: .agents/skills/c2ops-extension-ops
+      digest: sha256:7cd1038a902ccf60df71fe7a627c4b9785b883e07cb96bfefbd1c697b6c40c9d
