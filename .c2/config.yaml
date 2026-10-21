@@ -1,20 +1,20 @@
 self:
-  repo: https://github.com/colony-2/c2-root.git
+  repo: git@github.com:colony-2/c2-root.git
   ref: main
   name: root
 root:
-  repo: https://github.com/colony-2/c2-root.git
+  repo: git@github.com:colony-2/c2-root.git
   ref: main
 
 jobdb: http://192.168.1.195:9047/c2
 dependents:
-  - https://github.com/colony-2/c2j.git
-  - https://github.com/colony-2/cortex.git
-  - https://github.com/colony-2/pulse.git
-  - https://github.com/colony-2/jobdb.git
-  - https://github.com/colony-2/pgjobdb.git
-  - https://github.com/colony-2/shai.git
-  - https://github.com/colony-2/c2ops.git
-  - https://github.com/colony-2/recipes.git
-  - https://github.com/colony-2/gitvend.git
-  - https://github.com/colony-2/base.git
+  - git@github.com:colony-2/c2j.git
+  - git@github.com:colony-2/cortex.git
+  - git@github.com:colony-2/pulse.git
+  - git@github.com:colony-2/jobdb.git
+  - git@github.com:colony-2/pgjobdb.git
+  - git@github.com:colony-2/shai.git
+  - git@github.com:colony-2/c2ops.git
+  - git@github.com:colony-2/recipes.git
+  - git@github.com:colony-2/gitvend.git
+  - git@github.com:colony-2/base.git
