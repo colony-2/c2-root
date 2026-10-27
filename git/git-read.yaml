@@ -1,0 +1,8 @@
+  version: 1
+  entries:
+    - url: http://192.168.1.195:8082/github/
+      rewrite_from:
+        - https://github.com/
+        - "git@github.com:"
+      username: git
+      secret_ref: gitvend_base_token
