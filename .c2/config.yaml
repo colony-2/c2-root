@@ -8,13 +8,53 @@ root:
 
 jobdb: http://192.168.1.195:9047/c2
 dependents:
-  - https://github.com/colony-2/c2j.git
-  - https://github.com/colony-2/cortex.git
-  - https://github.com/colony-2/pulse.git
-  - https://github.com/colony-2/jobdb.git
-  - https://github.com/colony-2/pgjobdb.git
-  - https://github.com/colony-2/shai.git
-  - https://github.com/colony-2/c2ops.git
-  - https://github.com/colony-2/recipes.git
-  - https://github.com/colony-2/gitvend.git
-  - https://github.com/colony-2/base.git
+  - repo: https://github.com/colony-2/c2j.git
+    description: >-
+      CLI and Go libraries for submitting, executing, and inspecting recipe jobs through JobDB.
+      Interprets recipe control flow and invokes built-in and extension operations in workers.
+      Supports local embedded and remote execution; compute provisioning belongs outside c2j.
+  - repo: https://github.com/colony-2/cortex.git
+    description: >-
+      Web interface for c2j recipe jobs backed by remote JobDB.
+      Supports submission, execution inspection, artifacts, restarts, and human input or document reviews.
+      Workers run separately against the same runtime.
+  - repo: https://github.com/colony-2/pulse.git
+    description: >-
+      Discovers eligible c2j jobs across a JobDB tenant and dispatches them to compatible executors.
+      Acquires leases and supplies them to c2j workers on local Docker or configured remote/cloud providers.
+      Owns compute dispatch rather than recipe semantics or durable state storage.
+  - repo: https://github.com/colony-2/jobdb.git
+    description: >-
+      Durable job runtime, public workflow APIs, and remote runtime server.
+      Coordinates execution state, leases, history, and artifact access for workers and clients.
+      Provides SQLite and in-memory options, with PostgreSQL support composed by pgjobdb.
+  - repo: https://github.com/colony-2/pgjobdb.git
+    description: >-
+      PostgreSQL scheduler and JobDB runtime integration.
+      Combines typed scheduling and persistent PostgreSQL state with JobDB's public workflow core.
+      Provides the PostgreSQL runtime executable and container distribution.
+  - repo: https://github.com/colony-2/shai.git
+    description: >-
+      Container sandbox tooling for agent and development commands.
+      Configures workspace access, network access, and host integrations for controlled execution environments.
+      Supports environment setup independently; current c2j operations execute directly in their provisioned worker environment.
+  - repo: https://github.com/colony-2/c2ops.git
+    description: >-
+      Packaged extension operations used by c2j recipes.
+      Provides agent/LLM, GitHub Actions, and policy integrations through a JSON input/output contract.
+      Published package selectors let recipes choose available operation implementations.
+  - repo: https://github.com/colony-2/recipes.git
+    description: >-
+      Shared C2 development recipes, authoring guides, and native c2j scenarios.
+      Combines operations into durable flows with consultation, human review, prerequisite coordination, implementation, and verification.
+      Supplies reusable workflow definitions consumed by c2j.
+  - repo: https://github.com/colony-2/gitvend.git
+    description: >-
+      Gateway for controlled GitHub repository access through scoped short-lived Git credentials.
+      Keeps upstream GitHub credentials outside agent environments and enforces repository/branch permissions.
+      An optional JobDB plugin issues credentials bounded by verified job lease authority.
+  - repo: https://github.com/colony-2/base.git
+    description: >-
+      Shared worker image and development tool distribution.
+      Supplies c2j and tools used in provisioned executors, including the base2 shared-Nix-store integration used by Pulse.
+      Provides an execution environment rather than scheduling or workflow state.
