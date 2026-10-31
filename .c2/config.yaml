@@ -58,3 +58,8 @@ dependents:
       Shared worker image and development tool distribution.
       Supplies c2j and tools used in provisioned executors, including the base2 shared-Nix-store integration used by Pulse.
       Provides an execution environment rather than scheduling or workflow state.
+  - repo: https://github.com/colony-2/cortex-assistant.git
+    description: >-
+      Reusable contextual assistant core, versioned serving protocol, and cell-local c2j session recipe.
+      Supports durable multi-turn root-executed sessions, contextual reads, documents and returned files/media, finish, and restart.
+      Orchestrates confirmed, deduplicated goal creation for existing cells; Cortex owns browser and HTTP integration.

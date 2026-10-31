@@ -101,6 +101,16 @@ required by every deployment.
 | [shai](https://github.com/colony-2/shai/blob/main/README.md) | Container sandbox tooling for agent and development commands, controlling workspace access, network access, and host integrations. Can provision controlled environments independently; c2j does not create a Shai sandbox per operation. |
 | [gitvend](https://github.com/colony-2/gitvend/blob/main/README.md) | Gateway providing scoped short-lived Git credentials without exposing upstream GitHub credentials to agents. Its optional JobDB plugin bounds issued credentials by verified job lease authority. |
 
+## Contextual assistant
+
+[Cortex Assistant](https://github.com/colony-2/cortex-assistant/blob/main/PURPOSE.md)
+is registered for the reusable assistant core, versioned protocol, and cell-local
+session recipe. Its responsibilities include durable contextual conversations,
+returned documents and files/media, finish and restart, and confirmed goal creation
+for existing cells. Cortex owns browser and HTTP integration. The repository is
+initialized with its purpose; serving implementation, recipe release, and consumer
+integration remain pending subsequent consultation and implementation.
+
 ## Finding your way around
 
 This repository, [c2-root](https://github.com/colony-2/c2-root), maintains the
@@ -119,6 +129,16 @@ c2j cells --json
 The catalog uses `repo`/`description` mappings in `dependents`, a supported c2j
 configuration form. Custom readers must accept that form rather than assuming
 all entries are repository strings.
+
+This repository's `build.sh` enforces a narrower source format for its catalog:
+one final `dependents` section with block mappings, unquoted canonical repository
+URLs, and folded `description: >-` values indented as in the existing entries.
+Every source entry must match that format; flow mappings, string entries,
+aliases, tags, and alternate indentation are rejected rather than skipped.
+This lets the check detect duplicates before c2j deduplicates repositories,
+using only the existing Python and c2j tools. It does not change c2j's supported
+configuration formats. Run `python3 -m unittest discover -s tests -v` for isolated
+catalog regression checks.
 
 Start with recipes for workflow authoring, c2ops for extension integrations,
 and c2j for execution and CLI usage. Use Pulse's README for executor provisioning
