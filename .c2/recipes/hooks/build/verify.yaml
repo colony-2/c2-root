@@ -1,0 +1,185 @@
+{
+  "id": "root-local-verify",
+  "version": "1.0.0",
+  "desc": "Read-only catalog, acceptance and documentation checks on Linux arm64.",
+  "inputs": {
+    "api_version": "${{ inputs.api_version }}",
+    "candidate": "${{ inputs.candidate }}",
+    "base": "${{ inputs.base }}"
+  },
+  "sequence": [
+    {
+      "id": "catalog",
+      "op": "command_execution",
+      "const": true,
+      "timeout": "3m",
+      "inputs": {
+        "shell": "bash",
+        "working_directory": "${{ context.environment.op.worktree_path }}",
+        "timeout": "2m",
+        "continue_on_error": true,
+        "capture_diagnostics": "always",
+        "env": {
+          "OUTBOX": "${{ context.environment.op.outbox }}",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "CANDIDATE": "${{ inputs.candidate }}",
+          "BASE": "${{ inputs.base }}"
+        },
+        "run": "set -euo pipefail\nexec > \"$OUTBOX/catalog.log\" 2>&1\nprintf 'Candidate: %s\\nBase: %s\\n' \"$CANDIDATE\" \"$BASE\"\nfor tool in bash python3 git c2j; do command -v \"$tool\"; done\nuname -s -m\ngit rev-parse HEAD\npython3 --version\nbash --version\ngit --version\nc2j version\nprintf 'Command: %s\\n' 'bash build.sh catalog'\nbash build.sh catalog\n"
+      },
+      "catch": [
+        {
+          "when": "failure.kind != 'cancellation'",
+          "continue": {
+            "outputs": {
+              "success": false,
+              "exit_code": -1,
+              "timed_out": "${{ failure.kind == 'timeout' }}",
+              "error_message": "${{ failure.message }}"
+            }
+          }
+        }
+      ],
+      "execution_needs": {
+        "packages": [
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#bash",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#python3",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#git",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#coreutils"
+        ]
+      }
+    },
+    {
+      "id": "acceptance",
+      "op": "command_execution",
+      "const": true,
+      "timeout": "3m",
+      "inputs": {
+        "shell": "bash",
+        "working_directory": "${{ context.environment.op.worktree_path }}",
+        "timeout": "2m",
+        "continue_on_error": true,
+        "capture_diagnostics": "always",
+        "env": {
+          "OUTBOX": "${{ context.environment.op.outbox }}",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "CANDIDATE": "${{ inputs.candidate }}",
+          "BASE": "${{ inputs.base }}"
+        },
+        "run": "set -euo pipefail\nexec > \"$OUTBOX/acceptance.log\" 2>&1\nprintf 'Candidate: %s\\nBase: %s\\n' \"$CANDIDATE\" \"$BASE\"\nfor tool in bash python3 git c2j; do command -v \"$tool\"; done\nuname -s -m\ngit rev-parse HEAD\npython3 --version\nbash --version\ngit --version\nc2j version\nprintf 'Command: %s\\n' 'python3 -m unittest discover -s tests -v'\npython3 -m unittest discover -s tests -v\n"
+      },
+      "catch": [
+        {
+          "when": "failure.kind != 'cancellation'",
+          "continue": {
+            "outputs": {
+              "success": false,
+              "exit_code": -1,
+              "timed_out": "${{ failure.kind == 'timeout' }}",
+              "error_message": "${{ failure.message }}"
+            }
+          }
+        }
+      ],
+      "execution_needs": {
+        "packages": [
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#bash",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#python3",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#git",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#coreutils"
+        ]
+      }
+    },
+    {
+      "id": "docs",
+      "op": "command_execution",
+      "const": true,
+      "timeout": "3m",
+      "inputs": {
+        "shell": "bash",
+        "working_directory": "${{ context.environment.op.worktree_path }}",
+        "timeout": "2m",
+        "continue_on_error": true,
+        "capture_diagnostics": "always",
+        "env": {
+          "OUTBOX": "${{ context.environment.op.outbox }}",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "CANDIDATE": "${{ inputs.candidate }}",
+          "BASE": "${{ inputs.base }}"
+        },
+        "run": "set -euo pipefail\nexec > \"$OUTBOX/docs.log\" 2>&1\nprintf 'Candidate: %s\\nBase: %s\\n' \"$CANDIDATE\" \"$BASE\"\nfor tool in bash python3; do command -v \"$tool\"; done\nuname -s -m\npython3 --version\nbash --version\nprintf 'Command: %s\\n' 'bash build.sh docs'\nbash build.sh docs\n"
+      },
+      "catch": [
+        {
+          "when": "failure.kind != 'cancellation'",
+          "continue": {
+            "outputs": {
+              "success": false,
+              "exit_code": -1,
+              "timed_out": "${{ failure.kind == 'timeout' }}",
+              "error_message": "${{ failure.message }}"
+            }
+          }
+        }
+      ],
+      "execution_needs": {
+        "packages": [
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#bash",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#python3",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#coreutils"
+        ]
+      }
+    },
+    {
+      "id": "summarize",
+      "op": "command_execution",
+      "const": true,
+      "timeout": "2m",
+      "artifacts": {
+        "./": "${{ jq([(has(sequence.catalog.artifacts) ? sequence.catalog.artifacts : {}), (has(sequence.acceptance.artifacts) ? sequence.acceptance.artifacts : {}), (has(sequence.docs.artifacts) ? sequence.docs.artifacts : {})], 'add | with_entries(select(.key == \"catalog.log\" or .key == \"acceptance.log\" or .key == \"docs.log\"))') }}"
+      },
+      "inputs": {
+        "shell": "bash",
+        "working_directory": "${{ context.environment.op.worktree_path }}",
+        "timeout": "1m",
+        "capture_diagnostics": "always",
+        "env": {
+          "INBOX": "${{ context.environment.op.inbox }}",
+          "OUTBOX": "${{ context.environment.op.outbox }}",
+          "API_VERSION": "${{ inputs.api_version }}",
+          "CANDIDATE": "${{ inputs.candidate }}",
+          "BASE": "${{ inputs.base }}",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "RESULTS": "${{ json_stringify({'catalog': sequence.catalog.outputs, 'acceptance': sequence.acceptance.outputs, 'docs': sequence.docs.outputs}) }}"
+        },
+        "run": "set -euo pipefail\npython3 scripts/verification_report.py\n"
+      },
+      "catch": [
+        {
+          "when": "failure.kind != 'cancellation'",
+          "continue": {
+            "outputs": {
+              "success": false,
+              "exit_code": -1,
+              "timed_out": "${{ failure.kind == 'timeout' }}",
+              "error_message": "${{ failure.message }}"
+            }
+          }
+        }
+      ],
+      "execution_needs": {
+        "packages": [
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#bash",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#python3",
+          "nix:github:NixOS/nixpkgs/b6018f87da91d19d0ab4cf979885689b469cdd41#git"
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "api_version": "c2.build-hook/v1",
+    "status": "${{ jq(sequence.summarize.outputs, '.success == true and .exit_code == 0 and .timed_out == false and (.diagnostic_errors // [] | length == 0) and (.stdout == \"passed\")') == true && has(sequence.summarize.artifacts) && 'verification.md' in sequence.summarize.artifacts && 'environment.json' in sequence.summarize.artifacts && 'results.json' in sequence.summarize.artifacts ? 'passed' : 'failed' }}",
+    "summary": "Root catalog, acceptance regressions and documentation checks completed; inspect behavior logs and verification.md.",
+    "artifact_refs": "${{ jq([jq([(has(sequence.catalog.artifacts) ? sequence.catalog.artifacts : {}), (has(sequence.acceptance.artifacts) ? sequence.acceptance.artifacts : {}), (has(sequence.docs.artifacts) ? sequence.docs.artifacts : {})], 'add | with_entries(select(.key == \"catalog.log\" or .key == \"acceptance.log\" or .key == \"docs.log\"))'), (has(sequence.summarize.artifacts) ? sequence.summarize.artifacts : {})], 'add | with_entries(select(.key == \"catalog.log\" or .key == \"acceptance.log\" or .key == \"docs.log\" or .key == \"verification.md\" or .key == \"environment.json\" or .key == \"results.json\"))') }}"
+  }
+}

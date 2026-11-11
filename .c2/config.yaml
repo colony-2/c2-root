@@ -6,6 +6,9 @@ root:
   repo: https://github.com/colony-2/c2-root.git
   ref: main
 
+execution:
+  base: ubuntu-26.04-arm64
+
 jobdb: http://192.168.1.195:9047/c2
 dependents:
   - repo: https://github.com/colony-2/c2j.git

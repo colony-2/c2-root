@@ -101,6 +101,12 @@ required by every deployment.
 | [shai](https://github.com/colony-2/shai/blob/main/README.md) | Container sandbox tooling for agent and development commands, controlling workspace access, network access, and host integrations. Can provision controlled environments independently; c2j does not create a Shai sandbox per operation. |
 | [gitvend](https://github.com/colony-2/gitvend/blob/main/README.md) | Gateway providing scoped short-lived Git credentials without exposing upstream GitHub credentials to agents. Its optional JobDB plugin bounds issued credentials by verified job lease authority. |
 
+## Provider plugins
+
+[Pulse Tart](https://github.com/colony-2/pulse-tart/blob/main/README.md)
+provides Tart-backed instances on Apple Silicon macOS hosts. It owns VM capacity,
+guest execution, and cleanup; Pulse owns scheduling and lease acquisition.
+
 ## Contextual assistant
 
 [Cortex Assistant](https://github.com/colony-2/cortex-assistant/blob/main/PURPOSE.md)
@@ -119,11 +125,18 @@ Its responsibilities are described in [PURPOSE.md](PURPOSE.md). Shared workflow
 definitions live in the recipes repository.
 
 The root catalog is [.c2/config.yaml](.c2/config.yaml). From this checkout, inspect
-the configured repositories and their descriptions without submitting work:
+the active registry and its descriptions without submitting work:
 
 ```sh
 c2j cells
 c2j cells --json
+```
+
+For the configured dependency routes, without contacting JobDB:
+
+```sh
+c2j cells --dependencies
+c2j cells --dependencies --json
 ```
 
 The catalog uses `repo`/`description` mappings in `dependents`, a supported c2j
@@ -149,3 +162,33 @@ configuration, and release compatibility requirements.
 When project responsibilities change, update catalog descriptions and this
 overview together. Keep detailed operational instructions in the component
 repositories so their owners can maintain them alongside the implementation.
+
+The local verify hook separately runs catalog/CLI consumers, deterministic acceptance
+regressions, and documentation structure checks. Run `bash build.sh catalog`,
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v`, and
+`bash build.sh docs` to reproduce them. Generated files stay outside the candidate.
+
+Root's candidate verification hook runs catalog/CLI checks, deterministic
+regressions and documentation checks separately on `ubuntu-26.04-arm64`.
+Each operation declares its own tools and exports bounded native evidence;
+missing tools, failed checks or missing evidence fail verification. Output and
+fixture work stay in scratch. The reviewed twelve-route inventory and complete
+descriptions are explicit expectations in `scripts/catalog.py`; catalog changes
+must update those expectations through normal review.
+
+For bounded caller/fault tests, run
+`python3 .c2/verify/generate-runtime-cases.py /tmp/root-hook-tests`, then
+`c2j test run --directory /tmp/root-hook-tests --case-timeout 45s`.
+The current native test runtime has no concrete execution allocation. Its
+optional `--local-runtime` generator mode uses a wildcard allocation for fixture-only
+mechanics tests; it does not establish production base inheritance. All modes
+use the base image’s installed c2j, recording and checking it independently
+in catalog and regression operations. A real candidate-loaded
+caller run on the required base must establish those prerequisites separately.
+
+`python3 -B .c2/verify/check-preservation.py /tmp/root-preservation-evidence`
+checks the hook's actual shell commands against disposable candidates containing
+tracked files and untracked binary, empty, executable and symlink canaries.
+It checks bytes and modes after success, forced failure and process-group
+cancellation. This installed-tool probe supplements native caller tests; it
+does not certify package resolution or typed recipe cancellation.
