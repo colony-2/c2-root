@@ -71,3 +71,8 @@ dependents:
       Tart-backed instance-provider plugin for Pulse on Apple Silicon macOS hosts.
       Provisions isolated VMs and delivers supplied worker processes while preserving Pulse submission and active-instance contracts.
       Owns Tart capacity, guest execution, and cleanup; Pulse retains scheduling and lease acquisition.
+  - repo: https://github.com/colony-2/infra.git
+    description: >-
+      Google Cloud infrastructure and deployment operations for shared platform access and isolated application environments.
+      Owns OpenTofu provisioning, private service networking, secrets references, upgrades and recovery.
+      Starts with Oregon dev Cloud Run and Cloud SQL plus shared Headscale SQLite and VPN routing; application code and identity contracts remain with their owners.

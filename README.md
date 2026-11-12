@@ -117,6 +117,21 @@ for existing cells. Cortex owns browser and HTTP integration. The repository is
 initialized with its purpose; serving implementation, recipe release, and consumer
 integration remain pending subsequent consultation and implementation.
 
+## Google Cloud infrastructure
+
+[infra](https://github.com/colony-2/infra/blob/main/PURPOSE.md) is the designated
+owner for OpenTofu provisioning, private networking, secrets references, upgrades
+and recovery. Its initial scope is Oregon (`us-west1`): shared platform Headscale
+with retained SQLite storage and a separate subnet/exit router, plus dev-owned
+Cloud SQL and private Cloud Run Zitadel. Only the two access hosts may accept
+public inbound traffic, in a separate access namespace; applications and SQL stay
+private. Application code and identity contracts remain with their existing owners.
+
+Infra is registered and its repository is initialized with its purpose document.
+The cloud environment remains to be implemented and deployed; private client access
+and restore checks require separate live evidence.
+Future stage/prod environments will have separate projects, state, data and issuers.
+
 ## Finding your way around
 
 This repository, [c2-root](https://github.com/colony-2/c2-root), maintains the
@@ -172,7 +187,7 @@ Root's candidate verification hook runs catalog/CLI checks, deterministic
 regressions and documentation checks separately on `ubuntu-26.04-arm64`.
 Each operation declares its own tools and exports bounded native evidence;
 missing tools, failed checks or missing evidence fail verification. Output and
-fixture work stay in scratch. The reviewed twelve-route inventory and complete
+fixture work stay in scratch. The reviewed thirteen-route inventory and complete
 descriptions are explicit expectations in `scripts/catalog.py`; catalog changes
 must update those expectations through normal review.
 

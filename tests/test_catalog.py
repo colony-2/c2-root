@@ -64,6 +64,24 @@ else:
     def test_current_config_and_cli_schema(self):
         self.run_check(True)
 
+    def test_infra_is_the_only_appended_route(self):
+        self.assertEqual(len(self.entries), 13)
+        self.assertEqual(self.entries[-1], {
+            'repo': 'https://github.com/colony-2/infra.git',
+            'description': 'Google Cloud infrastructure and deployment operations for shared platform access and isolated application environments. Owns OpenTofu provisioning, private service networking, secrets references, upgrades and recovery. Starts with Oregon dev Cloud Run and Cloud SQL plus shared Headscale SQLite and VPN routing; application code and identity contracts remain with their owners.',
+        })
+        self.assertEqual(sum(e['repo'].endswith('/infra.git') for e in self.entries), 1)
+        self.run_check(True)
+
+    def test_infra_consumer_and_documentation_rejections(self):
+        self.consumer['cells'] = [dict(c) for c in self.entries]
+        self.consumer['cells'][-1]['description'] = 'Incomplete infra description.'
+        self.run_check(False)
+        self.consumer['cells'] = self.entries
+        readme = (ROOT / 'README.md').read_text()
+        self.run_check(False, readme=readme.replace(
+            '/infra/blob/main/PURPOSE.md', '/unknown/blob/main/PURPOSE.md'))
+
     def test_real_consumer_without_jobdb(self):
         # Use the actual installed CLI, isolated from task helpers and live JobDB.
         config = self.config.replace('http://192.168.1.195:9047/c2', 'http://127.0.0.1:1/unavailable')
