@@ -1,7 +1,7 @@
 {
   "id": "root-local-verify",
   "version": "1.0.0",
-  "desc": "Read-only catalog, acceptance and documentation checks on Linux arm64.",
+  "desc": "Read-only configuration, identity, acceptance and documentation checks on Linux arm64.",
   "inputs": {
     "api_version": "${{ inputs.api_version }}",
     "candidate": "${{ inputs.candidate }}",
@@ -179,7 +179,7 @@
   "outputs": {
     "api_version": "c2.build-hook/v1",
     "status": "${{ jq(sequence.summarize.outputs, '.success == true and .exit_code == 0 and .timed_out == false and (.diagnostic_errors // [] | length == 0) and (.stdout == \"passed\")') == true && has(sequence.summarize.artifacts) && 'verification.md' in sequence.summarize.artifacts && 'environment.json' in sequence.summarize.artifacts && 'results.json' in sequence.summarize.artifacts ? 'passed' : 'failed' }}",
-    "summary": "Root catalog, acceptance regressions and documentation checks completed; inspect behavior logs and verification.md.",
+    "summary": "Root configuration, identity, acceptance regressions and documentation checks completed; inspect behavior logs and verification.md.",
     "artifact_refs": "${{ jq([jq([(has(sequence.catalog.artifacts) ? sequence.catalog.artifacts : {}), (has(sequence.acceptance.artifacts) ? sequence.acceptance.artifacts : {}), (has(sequence.docs.artifacts) ? sequence.docs.artifacts : {})], 'add | with_entries(select(.key == \"catalog.log\" or .key == \"acceptance.log\" or .key == \"docs.log\"))'), (has(sequence.summarize.artifacts) ? sequence.summarize.artifacts : {})], 'add | with_entries(select(.key == \"catalog.log\" or .key == \"acceptance.log\" or .key == \"docs.log\" or .key == \"verification.md\" or .key == \"environment.json\" or .key == \"results.json\"))') }}"
   }
 }

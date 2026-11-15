@@ -72,8 +72,9 @@ side-effect handling.
 
 ## Core projects
 
-Each project link opens its authoritative README with setup instructions and
-further guides.
+These component links are a starting point, not an exhaustive inventory. Each
+project link opens its authoritative README with setup instructions and further
+guides. Use the registry commands below to find current owners.
 
 | Project | Responsibility |
 | --- | --- |
@@ -135,38 +136,40 @@ Future stage/prod environments will have separate projects, state, data and issu
 ## Finding your way around
 
 This repository, [c2-root](https://github.com/colony-2/c2-root), maintains the
-project's cell catalog and routes general requests to the appropriate owner.
+project's overview and routes general requests to the appropriate owner.
 Its responsibilities are described in [PURPOSE.md](PURPOSE.md). Shared workflow
 definitions live in the recipes repository.
 
-The root catalog is [.c2/config.yaml](.c2/config.yaml). From this checkout, inspect
-the active registry and its descriptions without submitting work:
+Root's identity and execution settings live in [.c2/config.yaml](.c2/config.yaml).
+From this checkout, inspect the active JobDB registry and its descriptions without
+submitting work:
 
 ```sh
 c2j cells
 c2j cells --json
 ```
 
-For the configured dependency routes, without contacting JobDB:
+Root has no manual dependency routes. The following local check returns `[]`
+without contacting JobDB; it is not an offline inventory:
 
 ```sh
 c2j cells --dependencies
 c2j cells --dependencies --json
 ```
 
-The catalog uses `repo`/`description` mappings in `dependents`, a supported c2j
-configuration form. Custom readers must accept that form rather than assuming
-all entries are repository strings.
+This repository's `build.sh` checks root identity, execution settings and empty
+configured routes using Python and c2j. Its source checker accepts the small
+block-mapping format used here: unquoted scalar settings with two-space nested
+indentation, blank lines and comments. Unknown fields, duplicate keys and other
+YAML constructs fail rather than hiding a manual inventory or replacement
+discovery source. This restriction is local to root's checker; it does not change
+c2j's supported configuration formats. The checks need no live JobDB. Run
+`python3 -m unittest discover -s tests -v` for isolated regression checks.
 
-This repository's `build.sh` enforces a narrower source format for its catalog:
-one final `dependents` section with block mappings, unquoted canonical repository
-URLs, and folded `description: >-` values indented as in the existing entries.
-Every source entry must match that format; flow mappings, string entries,
-aliases, tags, and alternate indentation are rejected rather than skipped.
-This lets the check detect duplicates before c2j deduplicates repositories,
-using only the existing Python and c2j tools. It does not change c2j's supported
-configuration formats. Run `python3 -m unittest discover -s tests -v` for isolated
-catalog regression checks.
+Creating a cell reviews its name, repository and exact initial purpose, then
+registers it and initializes its repository. It does not copy root configuration
+or create a root commit. Registration alone does not make a cell ready: all
+required initializations must succeed.
 
 Start with recipes for workflow authoring, c2ops for extension integrations,
 and c2j for execution and CLI usage. Use Pulse's README for executor provisioning
@@ -174,22 +177,22 @@ and Cortex's README for the web interface. Consult JobDB and pgjobdb for runtime
 and storage setup. Each linked component README owns its installation details,
 configuration, and release compatibility requirements.
 
-When project responsibilities change, update catalog descriptions and this
-overview together. Keep detailed operational instructions in the component
-repositories so their owners can maintain them alongside the implementation.
+When project responsibilities change, update this overview where relevant.
+Keep detailed operational instructions in the component repositories so their
+owners can maintain them alongside the implementation.
 
-The local verify hook separately runs catalog/CLI consumers, deterministic acceptance
-regressions, and documentation structure checks. Run `bash build.sh catalog`,
+The local verify hook separately runs configuration/CLI identity checks,
+deterministic acceptance regressions, and documentation structure checks. Run `bash build.sh catalog`,
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v`, and
 `bash build.sh docs` to reproduce them. Generated files stay outside the candidate.
 
-Root's candidate verification hook runs catalog/CLI checks, deterministic
+Root's candidate verification hook runs configuration/CLI identity checks, deterministic
 regressions and documentation checks separately on `ubuntu-26.04-arm64`.
 Each operation declares its own tools and exports bounded native evidence;
 missing tools, failed checks or missing evidence fail verification. Output and
-fixture work stay in scratch. The reviewed thirteen-route inventory and complete
-descriptions are explicit expectations in `scripts/catalog.py`; catalog changes
-must update those expectations through normal review.
+fixture work stay in scratch. The existing `catalog` operation and log names are
+retained for callers; `scripts/catalog.py` now checks configuration and identity
+without fixing registry membership, count, order or descriptions.
 
 For bounded caller/fault tests, run
 `python3 .c2/verify/generate-runtime-cases.py /tmp/root-hook-tests`, then
