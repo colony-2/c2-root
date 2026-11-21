@@ -108,6 +108,13 @@ required by every deployment.
 provides Tart-backed instances on Apple Silicon macOS hosts. It owns VM capacity,
 guest execution, and cleanup; Pulse owns scheduling and lease acquisition.
 
+[Pulse Docker](https://github.com/colony-2/pulse-docker/blob/main/README.md)
+owns the independent Docker provider library implementing
+`pulse-provider-api.Provider`, including container execution, admission,
+dependency caches and cleanup. Pulse retains configuration, scheduling and lease
+acquisition. Pulse consumes this library for local Docker execution.
+A standalone remote executable and its transport are follow-up work.
+
 ## Contextual assistant
 
 [Cortex Assistant](https://github.com/colony-2/cortex-assistant/blob/main/PURPOSE.md)
