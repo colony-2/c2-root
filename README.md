@@ -125,6 +125,22 @@ for existing cells. Cortex owns browser and HTTP integration. The repository is
 initialized with its purpose; serving implementation, recipe release, and consumer
 integration remain pending subsequent consultation and implementation.
 
+## Portable agent sessions
+
+[acp-plus-session](https://github.com/colony-2/acp-plus-session) provides a
+TypeScript library, CLI and ACP endpoint for saving and restoring Codex and Claude
+conversations as opaque files plus JSON. Applications can add state through local
+extension hooks. Credentials and workspace contents are supplied separately; the
+wrappers run locally without C2 services. Codex uses an owned bridge to its direct
+CLI core, and Claude uses the upstream ACP adapter. App Servers are excluded.
+
+The merged candidate is qualified on Linux arm64 using real pinned runtimes
+against mock provider APIs, including continuation after deleting source state
+and relocating the workspace. macOS is outside the current scope. Git delivery
+is sufficient under the current human direction; a separately published tarball
+is not required. The repository documents the exact supported versions and
+consumer entrypoints.
+
 ## Google Cloud infrastructure
 
 [infra](https://github.com/colony-2/infra/blob/main/PURPOSE.md) is the designated
