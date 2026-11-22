@@ -9,4 +9,4 @@ root:
 execution:
   base: ubuntu-26.04-arm64
 
-jobdb: http://192.168.1.195:9047/c2
+jobdb: http://db.lab.c2.run:9047/c2
