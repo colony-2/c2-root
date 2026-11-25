@@ -3,6 +3,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -12,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('catalog', ROOT / 'scripts/catalog.py')
 catalog = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(catalog)
+
+JOBDB_ENTRY = re.compile(r'^jobdb:[ \t]*(.*)$', re.MULTILINE)
 
 
 class ConfigurationAcceptance(unittest.TestCase):
@@ -49,6 +52,13 @@ else:
         self.env = {'PATH': str(self.fixture / 'bin') + os.pathsep + os.environ['PATH'],
                     'HOME': str(self.fixture), 'PYTHONDONTWRITEBYTECODE': '1'}
 
+    def config_with_jobdb(self, value):
+        entry = f'jobdb: {value}' if value else 'jobdb:'
+        source, count = JOBDB_ENTRY.subn(entry, self.config)
+        self.assertEqual(count, 1, 'expected exactly one configured JobDB entry to replace')
+        self.assertEqual(JOBDB_ENTRY.findall(source), [value])
+        return source
+
     def run_check(self, accepted, config=None, readme=None, purpose=None):
         for name, content in [('.c2/config.yaml', self.config if config is None else config),
                               ('README.md', self.readme if readme is None else readme),
@@ -60,13 +70,16 @@ else:
         self.assertEqual(result.returncode == 0, accepted, result.stdout + result.stderr)
         if not accepted:
             self.assertIn('FAIL:', result.stderr)
+        return result
 
     def test_root_preserves_settings_without_inventory(self):
+        configured_jobdb = JOBDB_ENTRY.findall(self.config)
+        self.assertEqual(len(configured_jobdb), 1, 'expected exactly one configured JobDB entry')
         self.assertEqual(catalog.read_config(self.config), {
             'self': {'repo': 'https://github.com/colony-2/c2-root.git', 'ref': 'main', 'name': 'root'},
             'root': {'repo': 'https://github.com/colony-2/c2-root.git', 'ref': 'main'},
             'execution': {'base': 'ubuntu-26.04-arm64'},
-            'jobdb': 'http://192.168.1.195:9047/c2',
+            'jobdb': configured_jobdb[0],
         })
         self.run_check(True)
 
@@ -91,14 +104,20 @@ else:
 
     def test_malformed_or_duplicate_configuration_rejected(self):
         for source in [self.config.replace('self:', 'self'),
-                       self.config + 'jobdb: http://127.0.0.1:1\n',
-                       self.config.replace('  name: root', '  name: root\n  name: root'),
                        self.config.replace('  name: root', '   name: root'),
                        self.config.replace('self:', 'self: &identity'),
-                       self.config.replace('jobdb: http://192.168.1.195:9047/c2', 'jobdb:'),
                        self.config + '---\n', self.config + '\tinvalid: value\n']:
             with self.subTest(source=source):
                 self.run_check(False, config=source)
+        for key, source in [
+            ('jobdb', self.config.rstrip('\n') + '\njobdb: http://127.0.0.1:1\n'),
+            ('name', self.config.replace('  name: root', '  name: root\n  name: root')),
+        ]:
+            with self.subTest(duplicate=key):
+                result = self.run_check(False, config=source)
+                self.assertIn(f'FAIL: duplicate configuration key: {key}', result.stderr.splitlines())
+        result = self.run_check(False, config=self.config_with_jobdb(''))
+        self.assertIn('FAIL: missing or malformed JobDB setting', result.stderr.splitlines())
         self.run_check(True, config='# Root settings\n' + self.config + '\n# No inventory\n')
 
     def test_configured_identity_and_base_changes_rejected(self):
@@ -117,8 +136,8 @@ else:
     def test_real_checker_and_cli_with_unreachable_jobdb(self):
         # A minimal environment removes injected task helpers and live JobDB
         # settings. PATH excludes the fake CLI created for the other fixtures.
-        (self.fixture / '.c2/config.yaml').write_text(self.config.replace(
-            'http://192.168.1.195:9047/c2', 'http://127.0.0.1:1/unavailable'))
+        unreachable = 'http://127.0.0.1:1/unavailable'
+        (self.fixture / '.c2/config.yaml').write_text(self.config_with_jobdb(unreachable))
         env = {'PATH': os.environ['PATH'], 'HOME': str(self.fixture), 'PYTHONDONTWRITEBYTECODE': '1'}
         result = subprocess.run(['bash', 'build.sh', 'catalog'], cwd=self.fixture,
                                 env=env, capture_output=True, text=True, timeout=30)
